@@ -30,6 +30,7 @@
  *     NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+import {Constants} from "./Constants";
 
 export class TransactionOut {
     amount: number = 0;
@@ -109,6 +110,10 @@ export class Transaction {
     fees: number = 0;
 
     static fromRaw(raw: any) {
+        if (Constants.DEBUG_STATE) {
+            console.log(`Tx fromRaw`)
+            console.log(raw)
+        }
         let transac = new Transaction();
         transac.blockHeight = raw.blockHeight;
         transac.txPubKey = raw.txPubKey;

@@ -65,6 +65,14 @@ onmessage = function (data: MessageEvent) {
 	// }else {
 	// 	console.warn('Non trusted data', data.data, JSON.stringify(data.data));
 	// }
+
+	if (Constants.DEBUG_STATE) {
+		// @ts-ignore
+		let tempAll = currentWallet.getAll()
+		if (tempAll.length > 0) {
+			console.log(tempAll);
+		}
+	}
 };
 
 postMessage('ready');

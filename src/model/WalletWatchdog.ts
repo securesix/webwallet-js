@@ -32,6 +32,7 @@ import {Wallet} from "./Wallet";
 import {BlockchainExplorer, RawDaemon_Transaction} from "./blockchain/BlockchainExplorer";
 import {Transaction} from "./Transaction";
 import {TransactionsExplorer} from "./TransactionsExplorer";
+import {Constants} from "./Constants";
 
 export class WalletWatchdog {
 
@@ -60,8 +61,13 @@ export class WalletWatchdog {
                 if (message.type === 'processed') {
                     let transactions = message.transactions;
                     if (transactions.length > 0) {
-                        for (let tx of transactions)
+                        for (let tx of transactions){
+                            if (Constants.DEBUG_STATE) {
+                                console.log(`Initworker tx: `)
+                                console.log(tx)
+                            }
                             self.wallet.addNew(Transaction.fromRaw(tx));
+                        }
                         self.signalWalletUpdate();
                     }
                     if (self.workerCurrentProcessing.length > 0) {

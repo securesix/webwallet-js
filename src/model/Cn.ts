@@ -32,6 +32,7 @@
  */
 
 import {Mnemonic} from "./Mnemonic";
+import {Constants} from "./Constants";
 
 declare let Module : any;
 
@@ -205,7 +206,12 @@ export namespace CnUtils{
 
 	//integer (string) to scalar
 	export function d2s(integer : number|string){
-		return CnUtils.swapEndian(CnUtils.d2h(integer));
+		if (typeof integer === "string") {
+			return CnUtils.swapEndian(CnUtils.d2h(integer));
+		} else {
+			return CnUtils.swapEndian(CnUtils.d2h(integer.toString()));
+		}
+
 	}
 
 	// hexadecimal to integer
@@ -361,26 +367,18 @@ export namespace CnUtils{
 	}
 
 	export function decompose_amount_into_digits(amount : number|string) {
-		let amountStr = amount.toString();
+		amount = amount.toString();
 		let ret = [];
-		while (amountStr.length > 0) {
-			//split all the way down since v2 fork
-			/*let remaining = new JSBigInt(amount);
-			 if (remaining.compare(config.dustThreshold) <= 0) {
-			 if (remaining.compare(0) > 0) {
-			 ret.push(remaining);
-			 }
-			 break;
-			 }*/
+		while (amount.length > 0) {
 			//check so we don't create 0s
-			if (amountStr[0] !== "0"){
-				let digit = amountStr[0];
-				while (digit.length < amountStr.length) {
+			if (amount[0] !== "0"){
+				let digit = amount[0];
+				while (digit.length < amount.length) {
 					digit += "0";
 				}
 				ret.push(new JSBigInt(digit));
 			}
-			amount = amountStr.slice(1);
+			amount = amount.slice(1);
 		}
 		return ret;
 	}
@@ -1094,7 +1092,7 @@ export namespace CnTransactions{
 	}
 
 	//TODO duplicate above
-	export function generate_key_image_helper_rct(keys : {view:{sec:string}, spend:{pub:string,sec:string}}, tx_pub_key : string, out_index : number, enc_mask : string) {
+	export function generate_key_image_helper_rct(keys : {view:{sec:string}, spend:{pub:string,sec:string}}, tx_pub_key : string, out_index : number, enc_mask : string | null) {
 		let recv_derivation = CnNativeBride.generate_key_derivation(tx_pub_key, keys.view.sec);
 		if (!recv_derivation) throw "Failed to generate key image";
 
@@ -1108,7 +1106,16 @@ export namespace CnTransactions{
 		else
 		{
 			// for other ringct types or for non-ringct txs to this.
-			mask = enc_mask ? CnNativeBride.sc_sub(enc_mask, Cn.hash_to_scalar(CnUtils.derivation_to_scalar(recv_derivation, out_index))) : CnVars.I; //decode mask, or d2s(1) if no mask
+			let temp0 = CnUtils.derivation_to_scalar(recv_derivation, out_index);
+			let temp1 = Cn.hash_to_scalar(temp0);
+			if (Constants.DEBUG_STATE) {
+				console.log(`enc_mask`);
+				console.log(enc_mask);
+				console.log(`temp0 ${temp0}, length: ${temp0.length}`);
+				console.log(`temp0 ${temp1}, length: ${temp1.length}`);
+			}
+
+			mask = enc_mask ? CnNativeBride.sc_sub(enc_mask, temp1) : CnVars.I; //decode mask, or d2s(1) if no mask
 		}
 
 		let ephemeral_pub = CnNativeBride.derive_public_key(recv_derivation, out_index, keys.spend.pub);
@@ -1145,6 +1152,10 @@ export namespace CnTransactions{
 			}
 		} else {
 			for (let i = 0; i < dsts.length; i++) {
+				if (Constants.DEBUG_STATE) {
+					console.log(`decompose destination: `)
+					console.log(dsts[i])
+				}
 				let digits = CnUtils.decompose_amount_into_digits(dsts[i].amount);
 				for (let j = 0; j < digits.length; j++) {
 					if (digits[j].compare(0) > 0) {
@@ -1405,6 +1416,18 @@ export namespace CnTransactions{
 		return buf;
 	}
 
+	export function serialize_tx_with_hash (tx : CnTransactions.Transaction) {
+		var hashes = "";
+		var buf = "";
+		buf += CnTransactions.serialize_tx(tx, false);
+		hashes += CnUtils.cn_fast_hash(buf);
+
+		return {
+			raw: buf,
+			hash: hashes,
+			prvkey: tx.prvkey
+		};
+	};
 
 	export function serialize_rct_tx_with_hash(tx : CnTransactions.Transaction) {
 		let hashes = "";
@@ -1925,6 +1948,13 @@ export namespace CnTransactions{
 			},
 			signatures:[]
 		};
+
+		if (rct) {
+			tx.rct_signatures = {ecdhInfo: [], outPk: [], pseudoOuts: [], txnFee: "", type: 0};
+		} else {
+			tx.signatures = [];
+		}
+
 		tx.prvkey = txkey.sec;
 
 		let in_contexts = [];
@@ -1943,7 +1973,7 @@ export namespace CnTransactions{
 
 			// sets res.mask among other things. mask is identity for non-rct transactions
 			// and for coinbase ringct (type = 0) txs.
-			let res = CnTransactions.generate_key_image_helper_rct(keys, sources[i].real_out_tx_key, sources[i].real_out_in_tx, ''+sources[i].mask); //mask will be undefined for non-rct
+			let res = CnTransactions.generate_key_image_helper_rct(keys, sources[i].real_out_tx_key, sources[i].real_out_in_tx, sources[i].mask); //mask will be undefined for non-rct
 			// in_contexts.push(res.in_ephemeral);
 
 			// now we mark if this is ringct coinbase txs. such transactions
@@ -2142,7 +2172,6 @@ export namespace CnTransactions{
 									   }[],
 									   mix_outs:{
 										   outputs:{
-											   rct: string,
 											   public_key:string,
 											   global_index:number
 										   }[],

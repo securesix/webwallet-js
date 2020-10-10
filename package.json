@@ -1,6 +1,6 @@
 {
   "name": "qwertycoinwebwallet",
-  "version": "1.0.15",
+  "version": "2.0.2",
   "description": "Fully client side web wallet for Qwertycoin",
   "main": "index.js",
   "dependencies": {

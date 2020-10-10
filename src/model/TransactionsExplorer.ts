@@ -37,6 +37,7 @@ import {MathUtil} from "./MathUtil";
 import {Cn, CnNativeBride, CnRandom, CnTransactions, CnUtils} from "./Cn";
 import {RawDaemon_Transaction} from "./blockchain/BlockchainExplorer";
 import hextobin = CnUtils.hextobin;
+import {Constants} from "./Constants";
 
 export const TX_EXTRA_PADDING_MAX_COUNT = 255;
 export const TX_EXTRA_NONCE_MAX_COUNT = 255;
@@ -148,7 +149,6 @@ export class TransactionsExplorer {
 
 	static parse(rawTransaction: RawDaemon_Transaction, wallet: Wallet): Transaction | null {
 		let transaction: Transaction | null = null;
-
 		let tx_pub_key = '';
 		let paymentId: string | null = null;
 
@@ -235,32 +235,10 @@ export class TransactionsExplorer {
 			let mine_output = (txout_k.key == generated_tx_pubkey);
 
 			if (mine_output) {
-				/*
-                let minerTx = false;
 
-                if (amount !== 0) {
-                    //miner tx
-                    minerTx = true;
-                } else {
-                    let mask = rawTransaction.rct_signatures.ecdhInfo[output_idx_in_tx].mask;
-                    let r = CnTransactions.decode_ringct(rawTransaction.rct_signatures,
-                        tx_pub_key,
-                        wallet.keys.priv.view,
-                        output_idx_in_tx,
-                        mask,
-                        amount,
-                        derivation);
-
-                    if (r === false) {
-                        console.error("Cant decode ringCT!");
-                        continue;
-                    } else
-                        amount = r;
-                }
-*/
 				let transactionOut = new TransactionOut();
 				if (typeof rawTransaction.global_index_start !== 'undefined')
-					transactionOut.globalIndex = rawTransaction.global_index_start + output_idx_in_tx;
+					transactionOut.globalIndex = rawTransaction.output_indices[output_idx_in_tx];
 				else
 					transactionOut.globalIndex = output_idx_in_tx;
 
@@ -394,12 +372,16 @@ export class TransactionsExplorer {
 		// {"height"          , tx.height},
 		// {"spend_key_images", json::array()}
 
-		console.log(wallet.getAll());
 		for (let tr of wallet.getAll()) {
 			//todo improve to take into account miner tx
 			//only add outs unlocked
 			if (!tr.isConfirmed(blockchainHeight)) {
 				continue;
+			}
+
+			if (Constants.DEBUG_STATE) {
+				console.log(`tr:`)
+				console.log(tr)
 			}
 
 			for (let out of tr.outs) {
@@ -461,6 +443,14 @@ export class TransactionsExplorer {
 				}
 
 				let splittedDsts = CnTransactions.decompose_tx_destinations(dsts, rct);
+
+				if (Constants.DEBUG_STATE) {
+					console.log(`decompose_tx_destinations now`)
+					console.log(`splittedDsts: `)
+					console.log(splittedDsts)
+					console.log(`create_transaction now`)
+				}
+
 				signed = CnTransactions.create_transaction(
 					{
 						spend: wallet.keys.pub.spend,
@@ -475,7 +465,7 @@ export class TransactionsExplorer {
 					realDestViewKey, 0, rct);
 
 				console.log("signed tx: ", signed);
-				let raw_tx_and_hash = CnTransactions.serialize_rct_tx_with_hash(signed);
+				let raw_tx_and_hash = CnTransactions.serialize_tx_with_hash(signed);
 				resolve({raw: raw_tx_and_hash, signed: signed});
 
 			} catch (e) {
@@ -505,6 +495,10 @@ export class TransactionsExplorer {
 			let dsts: { address: string, amount: number }[] = [];
 
 			for (let dest of userDestinations) {
+				if (Constants.DEBUG_STATE) {
+					console.log(`Destination: `)
+					console.log(dest)
+				}
 				totalAmountWithoutFee = totalAmountWithoutFee.add(dest.amount);
 				let target = Cn.decode_address(dest.address);
 				if (target.intPaymentId !== null) {
