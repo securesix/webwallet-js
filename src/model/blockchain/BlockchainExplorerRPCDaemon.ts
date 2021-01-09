@@ -157,66 +157,90 @@ export class BlockchainExplorerRpcDaemon implements BlockchainExplorer {
             tempStartBlock = startBlock;
         }
 
-        return this.makeRequest('POST', 'get_transactions_by_heights', {
+        return this.makeRequest('POST', 'get_raw_transactions_by_heights', {
             heights: [tempStartBlock, endBlock],
-            include_miner_txs: false,
-            as_json: true,
-            as_hex: false,
+            includeMinerTxs: false,
             range: true
-        }).then((answer: {
+        }).then((response: {
             status: 'OK' | 'string',
-            txs: { as_hex: string, as_json: any, block_height: number, block_timestamp: number, output_indices: number[], tx_hash: string }[]
+            transactions: { transaction: any, timestamp: number, output_indexes: number[], height: number, block_hash: string, hash: string, fee: number }[]
         }) => {
             let formatted: RawDaemon_Transaction[] = [];
 
-            if (answer.status !== 'OK') throw 'invalid_transaction_answer';
+            if (response.status !== 'OK') throw 'invalid_transaction_answer';
 
-            if (answer.txs.length > 0) {
-                for (let rawTx of answer.txs) {
+            if (response.transactions.length > 0) {
+                for (let rawTx of response.transactions) {
                     let tx: RawDaemon_Transaction | null = null;
                     try {
-                        tx = rawTx.as_json;
+                        tx = rawTx.transaction;
                     } catch (e) {
                         try {
                             //compat for some invalid endpoints
-                            tx = rawTx.as_json;
+                            tx = rawTx.transaction;
                         } catch (e) {
                         }
                     }
                     if (tx !== null) {
-                        tx.ts = rawTx.block_timestamp;
-                        tx.height = rawTx.block_height;
-                        tx.hash = rawTx.tx_hash;
-                        if (rawTx.output_indices.length > 0)
-                            tx.global_index_start = rawTx.output_indices[0];
-                        tx.output_indices = rawTx.output_indices;
-
+                        tx.ts = rawTx.timestamp;
+                        tx.height = rawTx.height;
+                        tx.hash = rawTx.hash;
+                        if (rawTx.output_indexes.length > 0)
+                            tx.global_index_start = rawTx.output_indexes[0];
+                        tx.output_indexes = rawTx.output_indexes;
                         formatted.push(tx);
                     }
                 }
 
                 return formatted;
             } else {
-                return answer.status;
+                return response.status;
             }
         });
     }
 
     getTransactionPool(): Promise<RawDaemon_Transaction[]> {
-        return this.makeRequest('GET', 'api/mempool_detailed/').then(
-            (rawTransactions: {
-                tx_json: string
-            }[]) => {
+        return this.makeRequest('GET', 'get_raw_transactions_from_pool').then(
+            (response: {
+                status: 'OK' | 'string',
+                transactions: {
+                    transaction: any,
+                    timestamp: number,
+                    output_indexes: number[],
+                    height: number,
+                    block_hash: string,
+                    hash: string,
+                    fee: number
+                }[]
+            }) => {
                 let formatted: RawDaemon_Transaction[] = [];
-                for (let rawTransaction of rawTransactions) {
+                for (let rawTransaction of response.transactions) {
+                    let tx: RawDaemon_Transaction | null = null;
                     try {
-                        formatted.push(JSON.parse(rawTransaction.tx_json));
+                        tx = rawTransaction.transaction;
                     } catch (e) {
+                        try {
+                            tx = rawTransaction.transaction;
+                        } catch (e) {
+
+                        }
                         console.error(e);
                     }
+
+                    if (tx !== null) {
+                        tx.ts = rawTransaction.timestamp;
+                        tx.height = rawTransaction.height;
+                        tx.hash = rawTransaction.hash;
+                        if (rawTransaction.output_indexes.length > 0) {
+                            tx.global_index_start = rawTransaction.output_indexes[0];
+                            tx.output_indexes = rawTransaction.output_indexes;
+                        }
+                        formatted.push(tx);
+                    }
                 }
+
                 return formatted;
-        });
+            });
     }
 
     existingOuts: any[] = [];
@@ -279,8 +303,8 @@ export class BlockchainExplorerRpcDaemon implements BlockchainExplorer {
                     for (let output_idx_in_tx = 0; output_idx_in_tx < tx.vout.length; ++output_idx_in_tx) {
                         let rct = null;
                         let globalIndex: number = 0;
-                        if (typeof tx.global_index_start !== 'undefined' && typeof tx.output_indices !== 'undefined') {
-                            globalIndex = tx.output_indices[output_idx_in_tx];
+                        if (typeof tx.global_index_start !== 'undefined' && typeof tx.output_indexes !== 'undefined') {
+                            globalIndex = tx.output_indexes[output_idx_in_tx];
                         }
 
                         if (tx.vout[output_idx_in_tx].amount !== 0) {//check if miner tx

@@ -238,7 +238,7 @@ export class TransactionsExplorer {
 
 				let transactionOut = new TransactionOut();
 				if (typeof rawTransaction.global_index_start !== 'undefined')
-					transactionOut.globalIndex = rawTransaction.output_indices[output_idx_in_tx];
+					transactionOut.globalIndex = rawTransaction.output_indexes[output_idx_in_tx];
 				else
 					transactionOut.globalIndex = output_idx_in_tx;
 
