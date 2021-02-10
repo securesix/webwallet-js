@@ -159,7 +159,7 @@ export class BlockchainExplorerRpcDaemon implements BlockchainExplorer {
 
         return this.makeRequest('POST', 'get_raw_transactions_by_heights', {
             heights: [tempStartBlock, endBlock],
-            includeMinerTxs: false,
+            includeMinerTxs: true,
             range: true
         }).then((response: {
             status: 'OK' | 'string',
@@ -200,7 +200,7 @@ export class BlockchainExplorerRpcDaemon implements BlockchainExplorer {
     }
 
     getTransactionPool(): Promise<RawDaemon_Transaction[]> {
-        return this.makeRequest('GET', 'get_raw_transactions_from_pool').then(
+        return this.makeRequest('GET', 'getrawtransactionspool').then(
             (response: {
                 status: 'OK' | 'string',
                 transactions: {
