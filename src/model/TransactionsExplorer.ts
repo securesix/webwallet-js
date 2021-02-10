@@ -217,7 +217,7 @@ export class TransactionsExplorer {
 		let outs: TransactionOut[] = [];
 		let ins: TransactionIn[] = [];
 
-		for (let iOut = 0; iOut < rawTransaction.vout.length; ++iOut) {
+		for (let iOut = 0; iOut < rawTransaction.vout.length; iOut++) {
 			let out = rawTransaction.vout[iOut];
 			let txout_k = out.target.data;
 			let amount: number = 0;
@@ -238,7 +238,7 @@ export class TransactionsExplorer {
 
 				let transactionOut = new TransactionOut();
 				if (typeof rawTransaction.global_index_start !== 'undefined')
-					transactionOut.globalIndex = rawTransaction.output_indices[output_idx_in_tx];
+					transactionOut.globalIndex = rawTransaction.output_indexes[output_idx_in_tx];
 				else
 					transactionOut.globalIndex = output_idx_in_tx;
 
