@@ -301,27 +301,29 @@ export class TransactionsExplorer {
 
 				if (!vin.value) continue;
 
-				let absoluteOffets = vin.value.key_offsets.slice();
-				for (let i = 1; i < absoluteOffets.length; ++i) {
-					absoluteOffets[i] += absoluteOffets[i - 1];
-				}
-
-				let ownTx = -1;
-				for (let index of absoluteOffets) {
-					if (txOutIndexes.indexOf(index) !== -1) {
-						ownTx = index;
-						break;
+				if (rawTransaction.vin[iIn].type !== 'ff') {
+					let absoluteOffets = vin.value.key_offsets.slice();
+					for (let i = 1; i < absoluteOffets.length; ++i) {
+						absoluteOffets[i] += absoluteOffets[i - 1];
 					}
-				}
 
-				if (ownTx !== -1) {
-					let txOut = wallet.getOutWithGlobalIndex(ownTx);
-					if (txOut !== null) {
-						let transactionIn = new TransactionIn();
-						transactionIn.amount = -txOut.amount;
-						transactionIn.keyImage = txOut.keyImage;
+					let ownTx = -1;
+					for (let index of absoluteOffets) {
+						if (txOutIndexes.indexOf(index) !== -1) {
+							ownTx = index;
+							break;
+						}
+					}
 
-						ins.push(transactionIn);
+					if (ownTx !== -1) {
+						let txOut = wallet.getOutWithGlobalIndex(ownTx);
+						if (txOut !== null) {
+							let transactionIn = new TransactionIn();
+							transactionIn.amount = -txOut.amount;
+							transactionIn.keyImage = txOut.keyImage;
+
+							ins.push(transactionIn);
+						}
 					}
 				}
 			}

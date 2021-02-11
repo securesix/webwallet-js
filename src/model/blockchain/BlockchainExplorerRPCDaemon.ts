@@ -200,7 +200,7 @@ export class BlockchainExplorerRpcDaemon implements BlockchainExplorer {
     }
 
     getTransactionPool(): Promise<RawDaemon_Transaction[]> {
-        return this.makeRequest('GET', 'getrawtransactionspool').then(
+        return this.makeRequest('GET', 'api/mempool_detailed').then(
             (response: {
                 status: 'OK' | 'string',
                 transactions: {
