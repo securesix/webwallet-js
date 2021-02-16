@@ -159,7 +159,8 @@ export class BlockchainExplorerRpcDaemon implements BlockchainExplorer {
 
         return this.makeRequest('POST', 'get_transactions_by_heights', {
             heights: [tempStartBlock, endBlock],
-            includeMinerTxs: true,
+            include_miner_txs: true,
+            as_json: true,
             range: true
         }).then((response: {
             status: 'OK' | 'string',
