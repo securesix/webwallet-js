@@ -217,7 +217,7 @@ export class TransactionsExplorer {
 		let outs: TransactionOut[] = [];
 		let ins: TransactionIn[] = [];
 
-		for (let iOut = 0; iOut < rawTransaction.vout.length; iOut++) {
+		for (let iOut = 0; iOut < rawTransaction.vout.length; ++iOut) {
 			let out = rawTransaction.vout[iOut];
 			let txout_k = out.target.data;
 			let amount: number = 0;
@@ -238,7 +238,7 @@ export class TransactionsExplorer {
 
 				let transactionOut = new TransactionOut();
 				if (typeof rawTransaction.global_index_start !== 'undefined')
-					transactionOut.globalIndex = rawTransaction.output_indices[output_idx_in_tx];
+					transactionOut.globalIndex = rawTransaction.output_indexes[output_idx_in_tx];
 				else
 					transactionOut.globalIndex = output_idx_in_tx;
 
@@ -301,29 +301,27 @@ export class TransactionsExplorer {
 
 				if (!vin.value) continue;
 
-				if (rawTransaction.vin[iIn].type !== 'ff') {
-					let absoluteOffets = vin.value.key_offsets.slice();
-					for (let i = 1; i < absoluteOffets.length; ++i) {
-						absoluteOffets[i] += absoluteOffets[i - 1];
+				let absoluteOffets = vin.value.key_offsets.slice();
+				for (let i = 1; i < absoluteOffets.length; ++i) {
+					absoluteOffets[i] += absoluteOffets[i - 1];
+				}
+
+				let ownTx = -1;
+				for (let index of absoluteOffets) {
+					if (txOutIndexes.indexOf(index) !== -1) {
+						ownTx = index;
+						break;
 					}
+				}
 
-					let ownTx = -1;
-					for (let index of absoluteOffets) {
-						if (txOutIndexes.indexOf(index) !== -1) {
-							ownTx = index;
-							break;
-						}
-					}
+				if (ownTx !== -1) {
+					let txOut = wallet.getOutWithGlobalIndex(ownTx);
+					if (txOut !== null) {
+						let transactionIn = new TransactionIn();
+						transactionIn.amount = -txOut.amount;
+						transactionIn.keyImage = txOut.keyImage;
 
-					if (ownTx !== -1) {
-						let txOut = wallet.getOutWithGlobalIndex(ownTx);
-						if (txOut !== null) {
-							let transactionIn = new TransactionIn();
-							transactionIn.amount = -txOut.amount;
-							transactionIn.keyImage = txOut.keyImage;
-
-							ins.push(transactionIn);
-						}
+						ins.push(transactionIn);
 					}
 				}
 			}

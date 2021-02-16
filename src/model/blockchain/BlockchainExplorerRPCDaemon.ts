@@ -157,22 +157,13 @@ export class BlockchainExplorerRpcDaemon implements BlockchainExplorer {
             tempStartBlock = startBlock;
         }
 
-        return this.makeRequest('POST', 'get_transactions_by_heights', {
+        return this.makeRequest('POST', 'get_raw_transactions_by_heights', {
             heights: [tempStartBlock, endBlock],
-            include_miner_txs: true,
-            as_json: true,
+            includeMinerTxs: false,
             range: true
         }).then((response: {
             status: 'OK' | 'string',
-            transactions: {
-                as_json: any,
-                block_timestamp: number,
-                output_indices: number[],
-                block_height: number,
-                block_hash: string,
-                tx_hash: string,
-                fee: number
-            }[]
+            transactions: { transaction: any, timestamp: number, output_indexes: number[], height: number, block_hash: string, hash: string, fee: number }[]
         }) => {
             let formatted: RawDaemon_Transaction[] = [];
 
@@ -182,21 +173,21 @@ export class BlockchainExplorerRpcDaemon implements BlockchainExplorer {
                 for (let rawTx of response.transactions) {
                     let tx: RawDaemon_Transaction | null = null;
                     try {
-                        tx = rawTx.as_json;
+                        tx = rawTx.transaction;
                     } catch (e) {
                         try {
                             //compat for some invalid endpoints
-                            tx = rawTx.as_json;
+                            tx = rawTx.transaction;
                         } catch (e) {
                         }
                     }
                     if (tx !== null) {
-                        tx.ts = rawTx.block_timestamp;
-                        tx.height = rawTx.block_height;
-                        tx.hash = rawTx.tx_hash;
-                        if (rawTx.output_indices.length > 0)
-                            tx.global_index_start = rawTx.output_indices[0];
-                        tx.output_indices = rawTx.output_indices;
+                        tx.ts = rawTx.timestamp;
+                        tx.height = rawTx.height;
+                        tx.hash = rawTx.hash;
+                        if (rawTx.output_indexes.length > 0)
+                            tx.global_index_start = rawTx.output_indexes[0];
+                        tx.output_indexes = rawTx.output_indexes;
                         formatted.push(tx);
                     }
                 }
@@ -209,7 +200,7 @@ export class BlockchainExplorerRpcDaemon implements BlockchainExplorer {
     }
 
     getTransactionPool(): Promise<RawDaemon_Transaction[]> {
-        return this.makeRequest('GET', 'api/mempool_detailed').then(
+        return this.makeRequest('GET', 'get_raw_transactions_from_pool').then(
             (response: {
                 status: 'OK' | 'string',
                 transactions: {
@@ -242,7 +233,7 @@ export class BlockchainExplorerRpcDaemon implements BlockchainExplorer {
                         tx.hash = rawTransaction.hash;
                         if (rawTransaction.output_indexes.length > 0) {
                             tx.global_index_start = rawTransaction.output_indexes[0];
-                            tx.output_indices = rawTransaction.output_indexes;
+                            tx.output_indexes = rawTransaction.output_indexes;
                         }
                         formatted.push(tx);
                     }
@@ -312,8 +303,8 @@ export class BlockchainExplorerRpcDaemon implements BlockchainExplorer {
                     for (let output_idx_in_tx = 0; output_idx_in_tx < tx.vout.length; ++output_idx_in_tx) {
                         let rct = null;
                         let globalIndex: number = 0;
-                        if (typeof tx.global_index_start !== 'undefined' && typeof tx.output_indices !== 'undefined') {
-                            globalIndex = tx.output_indices[output_idx_in_tx];
+                        if (typeof tx.global_index_start !== 'undefined' && typeof tx.output_indexes !== 'undefined') {
+                            globalIndex = tx.output_indexes[output_idx_in_tx];
                         }
 
                         if (tx.vout[output_idx_in_tx].amount !== 0) {//check if miner tx
