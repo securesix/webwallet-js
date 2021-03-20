@@ -121,11 +121,11 @@
 				<div class="content" >
 					<div class="field">
 						<label>{{ $t("settingsPage.walletSettings.creationHeight.label") }}</label>
-						<input type="number" v-model="creationHeight" />
+						<input type="number" v-model="creationHeight" disabled/>
 					</div>
 					<div class="field">
 						<label>{{ $t("settingsPage.walletSettings.currentScanningHeight.label") }}</label>
-						<input type="number" v-model="scanHeight" />
+						<input type="number" v-model="scanHeight" disabled/>
 					</div>
 					<div class="actions tc">
 						<button @click="updateWalletSettings()" class="btn" >{{ $t("settingsPage.walletSettings.updateButton") }}</button>
