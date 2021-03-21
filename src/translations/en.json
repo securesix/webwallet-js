@@ -352,22 +352,29 @@
         "versionCode": "Version code: "
       },
       "settingsBlock": {
-        "speed": {
-          "label": "Speed to update the wallet (will consume more resources)",
-          "fastest": "Fastest",
-          "fast": "Fast",
-          "medium": "Medium",
-          "slow": "Slow"
+        "currency": {
+          "label": "National Currency"
         },
         "language": {
           "label": "Language"
         },
-        "currency": {
-          "label": "National Currency"
-        },
         "readMinerTx": {
           "label": "Read miner transactions (only for solo mining)"
-        }
+        },
+        "speed": {
+          "fast": "Fast",
+          "fastest": "Fastest",
+          "label": "Speed to update the wallet (will consume more resources)",
+          "medium": "Medium",
+          "slow": "Slow"
+        },
+        "customNode": {
+          "label": "Use custom node"
+        },
+        "nodeUrl": {
+          "label": "Node URL"
+        },
+        "chooseNode": "Choose your node:"
       },
       "changePasswordButton": "Change my wallet password",
       "deleteWalletButton": "Delete my wallet (local copy)",

@@ -52,19 +52,22 @@ export type DaemonResponseGetInfo = {
 }
 
 export class BlockchainExplorerRpcDaemon implements BlockchainExplorer {
-    daemonAddress = config.nodeList[Math.floor(Math.random() * Math.floor(config.nodeList.length))];
+    daemonAddress = config.nodeUrl;
     phpProxy: boolean = false;
+    intervalUpdateNode = 0;
 
     constructor(daemonAddress: string | null = null) {
         if (daemonAddress !== null && daemonAddress.trim() !== '') {
             this.daemonAddress = daemonAddress;
         }
+
+        console.log(config.nodeUrl)
     }
 
     protected makeRpcRequest(method: string, params: any = {}): Promise<any> {
         return new Promise<any>((resolve, reject) => {
             $.ajax({
-                url: this.daemonAddress + 'json_rpc' + (this.phpProxy ? '.php' : ''),
+                url: config.nodeUrl + 'json_rpc' + (this.phpProxy ? '.php' : ''),
                 method: 'POST',
                 data: JSON.stringify({
                     jsonrpc: '2.0',
@@ -79,10 +82,11 @@ export class BlockchainExplorerRpcDaemon implements BlockchainExplorer {
                     typeof raw.jsonrpc === 'undefined' ||
                     raw.jsonrpc !== '2.0' ||
                     typeof raw.result !== 'object'
-                )
+                ) {
                     reject('Daemon response is not properly formatted');
-                else
+                } else {
                     resolve(raw.result);
+                }
             }).fail(function (data: any) {
                 reject(data);
             });
@@ -92,7 +96,7 @@ export class BlockchainExplorerRpcDaemon implements BlockchainExplorer {
     protected makeRequest(method: 'GET' | 'POST', url: string, body: any = undefined): Promise<any> {
         return new Promise<any>((resolve, reject) => {
             $.ajax({
-                url: this.daemonAddress + url + (this.phpProxy ? '.php' : ''),
+                url: config.nodeUrl + url + (this.phpProxy ? '.php' : ''),
                 method: method,
                 data: typeof body === 'string' ? body : JSON.stringify(body)
             }).done(function (raw: any) {
@@ -369,7 +373,7 @@ export class BlockchainExplorerRpcDaemon implements BlockchainExplorer {
         return this.makeRpcRequest('getlastblockheader').then((raw: any) => {
             console.log(raw);
             return {
-                'node': this.daemonAddress.split(':')[1].replace(/[-[\]\/{}()*+?\\^$|#\s]/g, ''),
+                'node': config.nodeUrl.split(':')[1].replace(/[-[\]\/{}()*+?\\^$|#\s]/g, ''),
                 'major_version': raw.block_header['major_version'],
                 'hash': raw.block_header['hash'],
                 'reward': raw.block_header['reward'],

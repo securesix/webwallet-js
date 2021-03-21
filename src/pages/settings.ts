@@ -32,9 +32,13 @@ let wallet : Wallet = DependencyInjectorInstance().getInstance(Wallet.name, 'def
 let blockchainExplorer: BlockchainExplorer = BlockchainExplorerProvider.getInstance();
 let walletWatchdog : WalletWatchdog = DependencyInjectorInstance().getInstance(WalletWatchdog.name,'default', false);
 
-class SendView extends DestructableView{
+class SettingsView extends DestructableView{
 	@VueVar(10) readSpeed !: number;
 	@VueVar(false) checkMinerTx !: boolean;
+
+	@VueVar(false) customNode !: boolean;
+	@VueVar('https://pr02.myqwertycoin.com/sync/') nodeUrl !: string;
+	@VueVar([]) nodeList !: any;
 
 	@VueVar(0) creationHeight !: number;
 	@VueVar(0) scanHeight !: number;
@@ -52,6 +56,10 @@ class SendView extends DestructableView{
 		let self = this;
 		this.readSpeed = wallet.options.readSpeed;
 		this.checkMinerTx = wallet.options.checkMinerTx;
+
+		this.customNode = wallet.options.customNode;
+		this.nodeUrl = wallet.options.nodeUrl;
+		this.nodeList = config.nodeList;
 
 		this.creationHeight = wallet.creationHeight;
 		this.scanHeight = wallet.lastHeight;
@@ -102,6 +110,7 @@ class SendView extends DestructableView{
 	}
 
 	@VueWatched()	readSpeedWatch(){this.updateWalletOptions();}
+
 	@VueWatched()	checkMinerTxWatch(){this.updateWalletOptions();}
 	@VueWatched()	creationHeightWatch(){
 		if(this.creationHeight < 0)this.creationHeight = 0;
@@ -112,10 +121,20 @@ class SendView extends DestructableView{
 		if(this.scanHeight > this.maxHeight && this.maxHeight !== -1)this.scanHeight = this.maxHeight;
 	}
 
+	updateConnectionSettings() {
+		let options = wallet.options;
+		options.customNode = this.customNode;
+		options.nodeUrl = this.nodeUrl;
+		wallet.options = options;
+		walletWatchdog.signalWalletUpdate();
+	}
+
 	private updateWalletOptions(){
 		let options = wallet.options;
 		options.readSpeed = this.readSpeed;
 		options.checkMinerTx = this.checkMinerTx;
+		options.customNode = this.customNode;
+		options.nodeUrl = this.nodeUrl;
 		wallet.options = options;
 		walletWatchdog.signalWalletUpdate();
 	}
@@ -134,6 +153,6 @@ class SendView extends DestructableView{
 
 
 if(wallet !== null && blockchainExplorer !== null)
-	new SendView('#app');
+	new SettingsView('#app');
 else
 	window.location.href = '#index';

@@ -367,7 +367,14 @@
         },
         "readMinerTx": {
           "label": "Zeige etwaige Mining Transaktionen an (optional)"
-        }
+        },
+        "customNode": {
+          "label": "Favorisierten Server auswählen"
+        },
+        "nodeUrl": {
+          "label": "Server Auswahl"
+        },
+        "chooseNode": "Wähle deinen Server:"
       },
       "changePasswordButton": "Wallet Passwort ändern",
       "deleteWalletButton": "Entferne meine Wallet von diesem Gerät (nur wenn du ein Backup hast)",

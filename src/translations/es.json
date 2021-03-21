@@ -367,7 +367,14 @@
         },
         "readMinerTx": {
           "label": "Leer transacciones mineras (solo para minería en solitario)"
-        }
+        },
+        "customNode": {
+          "label": "Use custom node"
+        },
+        "nodeUrl": {
+          "label": "Node URL"
+        },
+        "chooseNode": "Choose your node:"
       },
       "changePasswordButton": "Cambiar mi contraseña de billetera",
       "deleteWalletButton": "Eliminar mi billetera (copia local)",

@@ -367,7 +367,14 @@
         },
         "readMinerTx": {
           "label": "Считывать транзакции майнинга (только для соло майнинга)"
-        }
+        },
+        "customNode": {
+          "label": "Use custom node"
+        },
+        "nodeUrl": {
+          "label": "Node URL"
+        },
+        "chooseNode": "Choose your node:"
       },
       "changePasswordButton": "Изменть пароль моего кошелька",
       "deleteWalletButton": "Удалить мой кошелек (локальную копию)",

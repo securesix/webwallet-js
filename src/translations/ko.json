@@ -367,7 +367,14 @@
         },
         "readMinerTx": {
           "label": "채굴관련 송금 확인 (오직 단독 채굴에 적용됨)"
-        }
+        },
+        "customNode": {
+          "label": "Use custom node"
+        },
+        "nodeUrl": {
+          "label": "Node URL"
+        },
+        "chooseNode": "Choose your node:"
       },
       "changePasswordButton": "비밀번호 변경",
       "deleteWalletButton": "웹지갑 지우기 (지금 사용하는 기기의 브라우저에 한정)",

@@ -49,6 +49,13 @@ export class WalletWatchdog {
 
     initWorker() {
         let self = this;
+        if (this.wallet.options.customNode) {
+            config.nodeUrl = this.wallet.options.nodeUrl;
+        } else {
+            let randInt = Math.floor(Math.random() * Math.floor(config.nodeList.length));
+            config.nodeUrl = config.nodeList[randInt].node;
+        }
+
         this.workerProcessing = new Worker('./workers/TransferProcessingEntrypoint.js');
         this.workerProcessing.onmessage = function (data: MessageEvent) {
             let message: string | any = data.data;
