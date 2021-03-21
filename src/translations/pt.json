@@ -343,7 +343,14 @@
 		},
 		"readMinerTx":{
 		  "label":"Ler transações de mineração (apenas para mineração solo)"
-		}
+		},
+		  "customNode": {
+			  "label": "Use custom node"
+		  },
+		  "nodeUrl": {
+			  "label": "Node URL"
+		  },
+		  "chooseNode": "Choose your node:"
 	  },
 	  "changePasswordButton":"Alterar minha senha da carteira",
 	  "deleteWalletButton":"Excluir minha carteira (cópia local)",

@@ -353,7 +353,14 @@
         },
         "readMinerTx": {
           "label": "تراکنش های ماینینگ فقط بصورت تکی"
-        }
+        },
+        "customNode": {
+          "label": "Use custom node"
+        },
+        "nodeUrl": {
+          "label": "Node URL"
+        },
+        "chooseNode": "Choose your node:"
       },
       "changePasswordButton": "تغییر رمز عبور کیف پول",
       "deleteWalletButton": "حذف کیف پول از روی سیستم شما",

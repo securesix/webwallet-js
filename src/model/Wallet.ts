@@ -1,7 +1,7 @@
 /**
  *	   Copyright (c) 2018, Gnock
- *     Copyright (c) 2018-2020, ExploShot
- *     Copyright (c) 2018-2020, The Qwertycoin Project
+ *     Copyright (c) 2018-2021, ExploShot
+ *     Copyright (c) 2018-2021, The Qwertycoin Project
  *     Copyright (c) 2018-2020, The Masari Project
  *     Copyright (c) 2014-2018, MyMonero.com
  *
@@ -39,17 +39,23 @@ import {Cn, CnTransactions} from "./Cn";
 export type RawWalletOptions = {
 	checkMinerTx?: boolean,
 	readSpeed: number,
+	customNode: boolean,
+	nodeUrl: string
 }
 
 export class WalletOptions {
 	checkMinerTx: boolean = false;
 	readSpeed: number = 10;
+	customNode: boolean = false;
+	nodeUrl: string = 'https://pr02.myqwertycoin.com/sync/';
 
 	static fromRaw(raw: RawWalletOptions) {
 		let options = new WalletOptions();
 
 		if (typeof raw.checkMinerTx !== 'undefined') options.checkMinerTx = raw.checkMinerTx;
 		if (typeof raw.readSpeed !== 'undefined') options.readSpeed = raw.readSpeed;
+		if (typeof raw.customNode !== 'undefined') options.customNode = raw.customNode;
+		if (typeof raw.nodeUrl !== 'undefined') options.nodeUrl = raw.nodeUrl;
 
 		return options;
 	}
@@ -57,7 +63,9 @@ export class WalletOptions {
 	exportToJson(): RawWalletOptions {
 		let data: RawWalletOptions = {
 			readSpeed: this.readSpeed,
-			checkMinerTx: this.checkMinerTx
+			checkMinerTx: this.checkMinerTx,
+			customNode: this.customNode,
+			nodeUrl: this.nodeUrl
 		};
 		return data;
 	}

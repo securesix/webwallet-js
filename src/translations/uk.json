@@ -367,7 +367,14 @@
         },
         "readMinerTx": {
           "label": "Зчитувати транзакції майнінгу (тільки для соло майнінгу)"
-        }
+        },
+        "customNode": {
+          "label": "Use custom node"
+        },
+        "nodeUrl": {
+          "label": "Node URL"
+        },
+        "chooseNode": "Choose your node:"
       },
       "changePasswordButton": "Змінити пароль мого гаманця",
       "deleteWalletButton": "Видалити мій гаманець (локальну копію)",

@@ -367,7 +367,14 @@
         },
         "readMinerTx": {
           "label": "Read miner transactions (only for solo mining)"
-        }
+        },
+        "customNode": {
+          "label": "Use custom node"
+        },
+        "nodeUrl": {
+          "label": "Node URL"
+        },
+        "chooseNode": "Choose your node:"
       },
       "changePasswordButton": "Change my wallet password",
       "deleteWalletButton": "Delete my wallet (local copy)",

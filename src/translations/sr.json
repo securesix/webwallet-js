@@ -368,7 +368,14 @@
         },
         "readMinerTx": {
           "label": "Трансакције рудара(само за соло рударење)"
-        }
+        },
+        "customNode": {
+          "label": "Use custom node"
+        },
+        "nodeUrl": {
+          "label": "Node URL"
+        },
+        "chooseNode": "Choose your node:"
       },
       "changePasswordButton": "Промени лозинку новчаника",
       "deleteWalletButton": "Обриши мој новчаник(локална копија)",

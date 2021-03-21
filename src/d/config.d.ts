@@ -1,5 +1,10 @@
 declare var config: {
-	nodeList: string[],
+	apiUrl: string[],
+	nodeList: {
+		owner: string,
+		node: string
+	}[],
+	nodeUrl: string,
 	electionApiUrl: string,
 	websiteApiUrl: string,
 	mainnetExplorerUrl: string,
