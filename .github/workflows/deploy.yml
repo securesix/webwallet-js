@@ -10,7 +10,6 @@ jobs:
       - name: Install and Build
         run: |
           npm install
-          npm ./node_modules/typescript/bin/tsc --project tsconfig.json
           npm run build
 
       - name: Deploy
